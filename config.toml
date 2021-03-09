@@ -1,0 +1,14 @@
+baseURL = "http://rojeralone.cn/"
+languageCode = "en-us"
+title = "RojerAlone"
+
+theme = "m10c"
+
+[params]
+  author = 'RojerAlone'
+  description = 'Developer'
+
+  [[params.social]]
+    icon = "github"
+    name = "Github"
+    url = "https://github.com/RojerAlone"
