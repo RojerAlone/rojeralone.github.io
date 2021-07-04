@@ -1,4 +1,16 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>RojerAlone</title><link>https://rojeralone.cn/</link><description>Recent content on RojerAlone</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Wed, 23 Jun 2021 20:14:15 +0800</lastBuildDate><atom:link href="https://rojeralone.cn/index.xml" rel="self" type="application/rss+xml"/><item><title>内存虚拟化之基础知识</title><link>https://rojeralone.cn/ostep/virtual-memory-basic/</link><pubDate>Wed, 23 Jun 2021 20:14:15 +0800</pubDate><guid>https://rojeralone.cn/ostep/virtual-memory-basic/</guid><description>内存虚拟化 - 基础知识 地址空间 操作系统为虚拟内存提供的抽象叫做地址空间(Address Space)，是运行中的进程能够看到的内存空间。进程申请内存主要用作 3 种数据的存储：代码、堆、栈。每个进程看到的地址空间都是一样的，给进程一种自己拥有所有内存的假象，而在真正的物理内存上，实现了进程隔离，保证了内存操作的安全性。
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>RojerAlone</title><link>https://rojeralone.cn/</link><description>Recent content on RojerAlone</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 04 Jul 2021 15:04:24 +0800</lastBuildDate><atom:link href="https://rojeralone.cn/index.xml" rel="self" type="application/rss+xml"/><item><title>2021 年中总结</title><link>https://rojeralone.cn/summary/2021-middle/</link><pubDate>Sun, 04 Jul 2021 15:04:24 +0800</pubDate><guid>https://rojeralone.cn/summary/2021-middle/</guid><description>转眼毕业工作 3 年了，却没有达到自己刚毕业时定下的目标：&amp;ldquo;工作 2 年的时候技术要比普通工作 3 年的人强&amp;rdquo;，这段话也早从记笔记的 git repo 删去了。
+去年年初给自己定了目标：学习 Golang，换个满意的工作，只完成了 75%，Golang 写了一个 cli，也刷了一些 LeetCode，算是完成了一半。现在回想起来完成了多少，但是实际上去年一整年都很少想起来还定了目标。
+今年年初也没有定目标，直到过来年回来上班，前两天比较闲，就翻了一些自己以前收藏的一些 blog，发现好多博主都有自己的阅读书单，并且年终总结读了多少本书，想想自己实在惭愧。
+刚毕业时，把 Netty 源码粗略看了一遍，写了博客，后来看了 Dubbo / Motan 的源码，在前司重构时候用处很大，去年刚跳槽后看了 Spring Boot 一部分源码，跟着小马哥的视频看，后来工作比较忙就没怎么看了，再加上女朋友毕业以后，周末光顾着玩，也没怎么学习。但是去年也是学了一些东西的，看了 DDIA，Raft 的论文，简单实现了 Leader 选举和很不严谨的日志复制，后来看了极客时间的 分布式协议与算法实战。组内组织过 APUE 的分享，自己懒就没参加，后来刷了一遍 趣谈 Linux 操作系统。
+回到看到别人的阅读书单。于是自己也给自己定了目标，今年读十本书，直到现在，已经读完了 3 本，正在读 3 本。 Linux 内核设计与实现
+不错的内核入门书，讲了怎么实现的，但是没有讲为什么这么实现，不太建议直接读
+HBase 不睡觉书
+工作中大量使用 HBase，查资料时候看到别人推荐的，一周就读完了，概览性质的书，建议入门读
+Redis 设计与实现
+讲了内部各种数据结构的实现，以及对应到 Redis 的五种数据类型分别用了哪种数据结构
+OSTEP
+操作系统的神书，由浅入深讲了为什么这么设计，另外直接读英文版的比较好，锻炼一下英文，也有汉译版，不过感觉质量一般，有能力还是读英文版，读完这本以后再读其他的 Linux 内核书就没什么压力了，值得多刷几次
+代码整洁之道</description></item><item><title>内存虚拟化之基础知识</title><link>https://rojeralone.cn/ostep/virtual-memory-basic/</link><pubDate>Wed, 23 Jun 2021 20:14:15 +0800</pubDate><guid>https://rojeralone.cn/ostep/virtual-memory-basic/</guid><description>内存虚拟化 - 基础知识 地址空间 操作系统为虚拟内存提供的抽象叫做地址空间(Address Space)，是运行中的进程能够看到的内存空间。进程申请内存主要用作 3 种数据的存储：代码、堆、栈。每个进程看到的地址空间都是一样的，给进程一种自己拥有所有内存的假象，而在真正的物理内存上，实现了进程隔离，保证了内存操作的安全性。
 目标 内存虚拟化的目标：
 透明 高效 保护：进程之间不能互相访问对方的内存空间 内存操作 API 一个进程会显示申请两种类型的内存，栈和堆。栈内存由编译器隐式帮程序员申请了，并且在生命周期结束后隐式释放，如果要将该内存在生命周期之外使用，则要分配堆内存，内存管理主要关注堆内存。
 malloc() void *malloc(size_t size) 申请大小为 size 的内存空间，返回指向这块内存空间的指针，一般使用类型转换转化为目标类型。size 一般使用 sizeof() 操作获取，因为在不同的平台上大小可能不一样，编译器会解析 sizeof() 的结果，而不是在运行时才解析。
