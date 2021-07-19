@@ -1,4 +1,17 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Osteps on RojerAlone</title><link>https://rojeralone.cn/ostep/</link><description>Recent content in Osteps on RojerAlone</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 11 Jul 2021 22:17:40 +0800</lastBuildDate><atom:link href="https://rojeralone.cn/ostep/index.xml" rel="self" type="application/rss+xml"/><item><title>OSTEP 读书笔记: 内存虚拟化之内存页</title><link>https://rojeralone.cn/ostep/virtual-memory-page/</link><pubDate>Sun, 11 Jul 2021 22:17:40 +0800</pubDate><guid>https://rojeralone.cn/ostep/virtual-memory-page/</guid><description>如果将内存以定长的分页管理，那么就能解决分段管理内存的碎片化问题，并且管理空闲内存也更方便，只需要一个空闲 page 列表，需要多大内存就分配相应个数的 page 就可以了。
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Osteps on RojerAlone</title><link>https://rojeralone.cn/ostep/</link><description>Recent content in Osteps on RojerAlone</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 19 Jul 2021 23:27:08 +0800</lastBuildDate><atom:link href="https://rojeralone.cn/ostep/index.xml" rel="self" type="application/rss+xml"/><item><title>OSTEP 读书笔记: 并发之锁</title><link>https://rojeralone.cn/ostep/concurrency-lock/</link><pubDate>Mon, 19 Jul 2021 23:27:08 +0800</pubDate><guid>https://rojeralone.cn/ostep/concurrency-lock/</guid><description>评估 如果评估锁的好坏？
+是否能够做到互斥 公平性，避免饥饿 性能 实现方式 控制中断 最简单的实现方式，当执行需要互斥的代码时，禁止中断。
+问题：
+禁止中断是特权操作，普通进程能执行这个操作比较危险 多处理器时，这种方式就不管用了 关掉中断可能导致比较重要的中断无法响应，甚至导致系统崩溃 性能很差 Loads / Stores 用一个变量标识是否获取了锁，问题是，两个线程同时执行 if (flag == 0) flag = 1 这个操作，这不是个原子操作，可能会被中断，A 准备赋值为 1 时被中断了，导致另一个线程认为自己应该获取锁，那么两个线程都能获取到锁。
+Test-And-Set 自旋锁 硬件提供了 Test-And-Set 指令，对某个变量设置新值的同时返回旧值，操作系统在这个指令的基础上实现锁的概念。
+这个实现方式可以保证互斥，但是不能保证公平，性能也比较差，存在浪费 CPU 的情况（一直循环执行 Test-And-Set）。
+另外，一些 CPU 也提供了另一种硬件支持的原语，Compare-And-Set CAS，也能实现锁。
+还有其他的硬件支持的指令，比如 Fetch-And-Add
+Just Yield 在自旋锁的基础上优化性能，对于没获取到锁的线程，让出自己的 CPU，然后等待已经获取锁的线程使用完后释放锁，主动唤醒正在等待的线程。
+问题是，并不能解决饥饿问题，存在线程反复获取锁然后释放，导致另一些线程一直等待的问题。
+等待队列 解决上一种实现方式的问题，没获取到锁的线程排队进入一个队列里，获取了锁的线程释放锁时，唤醒队列中第一个线程，避免无尽等待。需要操作系统提供支持，park() 用来让出 CPU 并睡眠，unpark(pid) 用来唤醒指定线程。
+两阶段锁 进一步优化，第一阶段尝试自旋获取锁，如果在执行时间内没有获取到锁，再进入等待队列。
+锁相关的数据结构 并发计数器 多个线程同时执行加法计算，由于要保证并发安全，需要加锁，那么多线程执行时的速度就很慢。理论上，多线程应该要比单线程要快，实际可能并非如此。
+通过多核 CPU 同时执行，能够提升相应的性能，叫做完美扩展，比如原来单个 CPU 需要 1s 完成的任务，任务量扩大了 3 倍，3 个 CPU 同时执行，还是只需要 1s 就能完成。</description></item><item><title>OSTEP 读书笔记: 内存虚拟化之内存页</title><link>https://rojeralone.cn/ostep/virtual-memory-page/</link><pubDate>Sun, 11 Jul 2021 22:17:40 +0800</pubDate><guid>https://rojeralone.cn/ostep/virtual-memory-page/</guid><description>如果将内存以定长的分页管理，那么就能解决分段管理内存的碎片化问题，并且管理空闲内存也更方便，只需要一个空闲 page 列表，需要多大内存就分配相应个数的 page 就可以了。
 为了简化虚拟内存到物理内存的映射关系，分页的大小是固定的，虚拟内存和物理内存都使用相同大小的分页。
 操作系统使用页表（page table) 来表示虚拟内存到物理内存的映射，并且每个进程都有自己的页表。
 每个虚拟内存页都有一个编号来表示，称为 VPN (Vitrual Page Number)，而物理内存页的编号为 PFN (Physical Frame Number) 或者 PPN (Physical Page Number)。
