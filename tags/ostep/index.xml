@@ -1,4 +1,22 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>ostep on RojerAlone</title><link>https://rojeralone.cn/tags/ostep/</link><description>Recent content in ostep on RojerAlone</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Mon, 19 Jul 2021 23:27:08 +0800</lastBuildDate><atom:link href="https://rojeralone.cn/tags/ostep/index.xml" rel="self" type="application/rss+xml"/><item><title>OSTEP 读书笔记: 并发之锁</title><link>https://rojeralone.cn/ostep/concurrency-lock/</link><pubDate>Mon, 19 Jul 2021 23:27:08 +0800</pubDate><guid>https://rojeralone.cn/ostep/concurrency-lock/</guid><description>评估 如果评估锁的好坏？
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>ostep on RojerAlone</title><link>https://rojeralone.cn/tags/ostep/</link><description>Recent content in ostep on RojerAlone</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 01 Aug 2021 17:39:19 +0800</lastBuildDate><atom:link href="https://rojeralone.cn/tags/ostep/index.xml" rel="self" type="application/rss+xml"/><item><title>OSTEP 读书笔记: 并发之条件变量和信号量</title><link>https://rojeralone.cn/ostep/concurrency-condition-variable-and-semaphore/</link><pubDate>Sun, 01 Aug 2021 17:39:19 +0800</pubDate><guid>https://rojeralone.cn/ostep/concurrency-condition-variable-and-semaphore/</guid><description>条件变量 线程可以使用一个变量来表示条件，当这个条件为 true 时，线程可以执行，否则需要等待，这就是条件变量。
+POSIX 定义了条件变量的原语：pthread_cond_wait 和 pthread_cond_signal，通常叫做 wait() 和 signal()。
+一般条件变量和锁一起使用，pthread_cond_wait 的参数就有个锁变量，持有锁的线程调用 wait() 释放锁，并等待唤醒，获取锁的线程调用 signal() 唤醒等待的线程，被唤醒的线程需要等待锁被释放，并且自己获取到锁以后再继续往下执行。
+为了更好理解条件变量的含义和用法，使用生产/消费者模型，或者叫有界缓冲区来帮助读者掌握。
+生产/消费者问题 初始版本是非常粗糙的实现，缓冲区只能存放一个元素，put / get 时分别需要判断队列是否满了或者空了。
+问题1：生产者消费者两个线程执行，很容易就遇到不满足判断条件的情况。
+优化1：使用条件变量。生产/消费前先获取锁，然后判断缓冲区的容量，如果不满足要求，就释放锁，等待条件变量满足后被唤醒。
+这样的优化在生产者和消费者都是单线程的情况下可以 work，但是如果消费者有 2 个，就会出现这样的情况：消费者 A 消费完后，唤醒了消费者 B，B 去消费，发现没有数据，get 失败了。
+问题2: 如果有多个消费者会出现被唤醒后，获取不到数据的情况
+优化2: 判断满足条件时，应该使用 while 循环判断，而不是 if，也就是 wait 等待的代码块应该在循环中，不是在 if 代码块中，这样被唤醒后再次判断条件是否满足，不满足继续睡眠等待。
+优化后还是有些小问题，当消费者消费完成后，唤醒的是另一个消费者，它发现队列是空的，就又陷入睡眠，这样并不是效率很高的执行方式，正确的操作是唤醒生产者，让它继续往队列里生产数据。
+问题3: 效率低，消费空队列后没唤醒生产者
+优化3: 使用两个条件变量，消费者等待队列中有数据的条件变量，生产者等待队列不满的条件变量。
+当缓冲区的大小只有 1 时，效率不是那么高，正常情况下也不会消费队列不会这么小。
+问题4: 缓冲区小，性能不够高
+优化4: 增大缓冲区，使用变量记录缓冲区大小，当缓冲区没满时生产者就一直生产，缓冲区不空消费者就一直消费。
+唤醒所有线程 上述问题 3 还有另一种解法，只用一个条件变量， 但是唤醒等待线程时不是只唤醒一个，而是唤醒所有的等待线程，这样就一定能够唤醒该唤醒的线程，不该唤醒的线程会影响性能，它们只检查条件，然后又陷入沉睡，这种能覆盖需要唤醒线程的场景叫做覆盖条件。
+一些想法 书中描述条件变量的唤醒时，只是说唤醒睡眠的线程，并没有详细描述怎么实现的，根据查资料以及个人的理解，signal() 并不是”真正“唤醒了线程，而是把线程从一个不可被调度器调度的状态，转为了可执行，但是在等待锁的状态，一般是从一个等待队列换到了竞争锁的队列中，直到调用 signal() 的线程释放锁，等待锁的线程竞争锁，如果被”唤醒“的线程竞争到了锁，那么它才真正被唤醒，继续接着 wait() 之后的代码执行，否则继续等待竞争锁。
+信号量 信号量是一个有计数的变量，sem_wait() 和 sem_post() 是操作信号量的两个指令，信号量初始化时可以执行计数的值，当计数值为负数时，表示有多少个线程在等待信号，否则，线程获取到了信号，可以立马执行。</description></item><item><title>OSTEP 读书笔记: 并发之锁</title><link>https://rojeralone.cn/ostep/concurrency-lock/</link><pubDate>Mon, 19 Jul 2021 23:27:08 +0800</pubDate><guid>https://rojeralone.cn/ostep/concurrency-lock/</guid><description>评估 如果评估锁的好坏？
 是否能够做到互斥 公平性，避免饥饿 性能 实现方式 控制中断 最简单的实现方式，当执行需要互斥的代码时，禁止中断。
 问题：
 禁止中断是特权操作，普通进程能执行这个操作比较危险 多处理器时，这种方式就不管用了 关掉中断可能导致比较重要的中断无法响应，甚至导致系统崩溃 性能很差 Loads / Stores 用一个变量标识是否获取了锁，问题是，两个线程同时执行 if (flag == 0) flag = 1 这个操作，这不是个原子操作，可能会被中断，A 准备赋值为 1 时被中断了，导致另一个线程认为自己应该获取锁，那么两个线程都能获取到锁。
