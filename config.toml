@@ -3,6 +3,7 @@ languageCode = "en-us"
 title = "RojerAlone"
 
 theme = "m10c"
+googleAnalytics = "G-T1VNZF1VBZ"
 
 [params]
   author = 'RojerAlone'
